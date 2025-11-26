@@ -1,0 +1,26 @@
+# Core data processing
+pandas==2.1.4
+numpy==1.26.2
+dask[complete]==2023.12.1
+
+# Visualization
+plotly==5.18.0
+dash==2.14.2
+dash-bootstrap-components==1.5.0
+folium==0.15.1
+branca==0.7.0
+
+# Network analysis
+networkx==3.2.1
+python-louvain==0.16
+
+# Geospatial
+geopandas==0.14.1
+shapely==2.0.2
+
+# Data serialization (for caching)
+pyarrow==14.0.1
+
+# Utilities
+python-dateutil==2.8.2
+tqdm==4.66.1
