@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Data files (large CSV files)
+*.csv
+!bangkok_traffy_30.csv
+data/
+raw_data/
+*.parquet
+*.feather
+
+# Cache
+.cache/
+*.pkl
+*.pickle
+
+# Environment variables
+.env
+.env.local
+
+# Dash/Plotly cache
+assets/.cache/
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
