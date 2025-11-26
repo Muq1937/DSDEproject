@@ -403,7 +403,7 @@ class TraffyDashboard:
         print(f"Starting Bangkok Traffy Dashboard...")
         print(f"Open your browser and navigate to: http://localhost:{port}")
         print(f"{'='*60}\n")
-        self.app.run_server(debug=debug, port=port, host='0.0.0.0')
+        self.app.run(debug=debug, port=port, host='0.0.0.0')
 
 
 if __name__ == "__main__":

@@ -64,6 +64,27 @@ An interactive geospatial dashboard for visualizing and analyzing Bangkok Traffy
    - Example: `bangkok_traffy_30.csv` (small sample included)
    - For 900MB file: ensure sufficient disk space for cache
 
+### Quick Start with Helper Scripts
+
+For easier setup, use the provided helper scripts:
+
+**On Linux/Mac:**
+```bash
+./run.sh
+```
+
+**On Windows:**
+```cmd
+run.bat
+```
+
+These scripts will:
+- Automatically create virtual environment if needed
+- Install dependencies on first run
+- Prompt you to select visualization mode
+- Ask for sample size and CSV filename
+- Handle activation/deactivation automatically
+
 ## Usage
 
 ### Quick Start
