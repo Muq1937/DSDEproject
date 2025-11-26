@@ -43,6 +43,47 @@ class TraffyDashboard:
             suppress_callback_exceptions=True
         )
 
+        # Add custom CSS to prevent chart expansion
+        self.app.index_string = '''
+        <!DOCTYPE html>
+        <html>
+            <head>
+                {%metas%}
+                <title>{%title%}</title>
+                {%favicon%}
+                {%css%}
+                <style>
+                    .dash-graph {
+                        max-width: 100%;
+                        overflow: hidden;
+                    }
+                    .plotly-graph-div {
+                        max-width: 100% !important;
+                        height: 100% !important;
+                    }
+                    .card {
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        border-radius: 8px;
+                    }
+                    .card-body {
+                        padding: 1rem;
+                    }
+                    .tab-content {
+                        padding: 1rem 0;
+                    }
+                </style>
+            </head>
+            <body>
+                {%app_entry%}
+                <footer>
+                    {%config%}
+                    {%scripts%}
+                    {%renderer%}
+                </footer>
+            </body>
+        </html>
+        '''
+
         self._setup_layout()
         self._setup_callbacks()
 
@@ -149,10 +190,10 @@ class TraffyDashboard:
                                 )
                             ], className="mb-3"),
 
-                            dcc.Graph(id='time-series-graph'),
+                            dcc.Graph(id='time-series-graph', style={'height': '450px'}),
 
                             html.H4("District-wise Distribution", className="mt-4"),
-                            dcc.Graph(id='district-bar-chart'),
+                            dcc.Graph(id='district-bar-chart', style={'height': '450px'}),
 
                         ], width=12)
                     ])
@@ -174,17 +215,17 @@ class TraffyDashboard:
                     dbc.Row([
                         dbc.Col([
                             html.H4("Top Complaint Types", className="mt-3"),
-                            dcc.Graph(id='type-pie-chart'),
+                            dcc.Graph(id='type-pie-chart', style={'height': '450px'}),
                         ], width=6),
                         dbc.Col([
                             html.H4("Complaint Resolution Status", className="mt-3"),
-                            dcc.Graph(id='state-pie-chart'),
+                            dcc.Graph(id='state-pie-chart', style={'height': '450px'}),
                         ], width=6),
                     ]),
                     dbc.Row([
                         dbc.Col([
                             html.H4("Solution Time Distribution", className="mt-4"),
-                            dcc.Graph(id='solve-time-histogram'),
+                            dcc.Graph(id='solve-time-histogram', style={'height': '400px'}),
                         ], width=12)
                     ])
                 ], label="📈 Statistics"),
@@ -262,7 +303,8 @@ class TraffyDashboard:
             fig.update_layout(
                 height=600,
                 margin={"r": 0, "t": 40, "l": 0, "b": 0},
-                showlegend=True
+                showlegend=True,
+                autosize=True
             )
 
             return fig
@@ -289,7 +331,12 @@ class TraffyDashboard:
                 labels={'year_month': 'Time Period', 'count': 'Number of Complaints'}
             )
 
-            fig.update_layout(height=400, xaxis_tickangle=-45)
+            fig.update_layout(
+                height=450,
+                xaxis_tickangle=-45,
+                margin=dict(l=50, r=20, t=50, b=80),
+                autosize=True
+            )
             return fig
 
         # District bar chart
@@ -314,7 +361,12 @@ class TraffyDashboard:
                 labels={'district': 'District', 'count': 'Number of Complaints'}
             )
 
-            fig.update_layout(height=400, xaxis_tickangle=-45)
+            fig.update_layout(
+                height=450,
+                xaxis_tickangle=-45,
+                margin=dict(l=50, r=20, t=50, b=80),
+                autosize=True
+            )
             return fig
 
         # Heatmap
@@ -339,7 +391,8 @@ class TraffyDashboard:
 
             fig.update_layout(
                 height=700,
-                margin={"r": 0, "t": 40, "l": 0, "b": 0}
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
+                autosize=True
             )
 
             return fig
@@ -357,6 +410,20 @@ class TraffyDashboard:
                 names=type_counts.index,
                 title='Top 10 Complaint Types'
             )
+
+            fig.update_layout(
+                height=450,
+                margin=dict(l=20, r=20, t=40, b=20),
+                showlegend=True,
+                legend=dict(
+                    orientation="v",
+                    yanchor="middle",
+                    y=0.5,
+                    xanchor="left",
+                    x=1.05
+                ),
+                autosize=True
+            )
             return fig
 
         # State pie chart
@@ -371,6 +438,20 @@ class TraffyDashboard:
                 values=state_counts.values,
                 names=state_counts.index,
                 title='Complaint Resolution Status'
+            )
+
+            fig.update_layout(
+                height=450,
+                margin=dict(l=20, r=20, t=40, b=20),
+                showlegend=True,
+                legend=dict(
+                    orientation="v",
+                    yanchor="middle",
+                    y=0.5,
+                    xanchor="left",
+                    x=1.05
+                ),
+                autosize=True
             )
             return fig
 
@@ -394,7 +475,11 @@ class TraffyDashboard:
                 labels={'solve_days': 'Days to Solve', 'count': 'Frequency'}
             )
 
-            fig.update_layout(height=400)
+            fig.update_layout(
+                height=400,
+                margin=dict(l=50, r=20, t=50, b=50),
+                autosize=True
+            )
             return fig
 
     def run(self, debug=True, port=8050):
