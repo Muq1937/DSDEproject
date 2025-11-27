@@ -46,41 +46,57 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    """Load processed complaint data"""
-    # In production, load from Delta Lake or processed parquet
-    # For demo, generate sample data
-    np.random.seed(42)
-    n_samples = 10000
+    """Load processed complaint data from bangkok_traffy_30.csv"""
+    # Load from actual CSV file
+    csv_path = 'bangkok_traffy_30.csv'
 
-    date_range = pd.date_range(start='2021-08-01', end='2025-01-31', freq='6H')
-    sample_dates = np.random.choice(date_range, size=n_samples)
+    # Load CSV
+    df = pd.read_csv(csv_path)
 
-    districts = [
-        'ปทุมวัน', 'ห้วยขวาง', 'ดินแดง', 'คลองเตย', 'วัฒนา',
-        'ราชเทวี', 'บางรัก', 'สาทร', 'ยานนาวา', 'พระโขนง',
-        'ลาดพร้าว', 'จตุจักร', 'บางเขน', 'ประเวศ', 'บางนา'
-    ]
+    # Parse type field - it's a set string like "{น้ำท่วม,ร้องเรียน}"
+    def parse_type(type_str):
+        if pd.isna(type_str) or type_str == '{}':
+            return 'Unknown'
+        # Remove curly braces and get first type
+        type_str = str(type_str).strip('{}')
+        types = [t.strip() for t in type_str.split(',')]
+        return types[0] if types else 'Unknown'
 
-    complaint_types = ['น้ำท่วม', 'จราจร', 'ความสะอาด', 'ถนน', 'ทางเท้า',
-                      'สะพาน', 'ท่อระบายน้ำ', 'ไฟฟ้า', 'ร้องเรียน']
+    df['type'] = df['type'].apply(parse_type)
 
-    df = pd.DataFrame({
-        'ticket_id': [f'2021-{i:06d}' for i in range(n_samples)],
-        'timestamp': sample_dates,
-        'district': np.random.choice(districts, n_samples),
-        'type': np.random.choice(complaint_types, n_samples),
-        'lat': 13.7563 + np.random.uniform(-0.15, 0.15, n_samples),
-        'lon': 100.5018 + np.random.uniform(-0.15, 0.15, n_samples),
-        'state': np.random.choice(['เสร็จสิ้น', 'กำลังดำเนินการ', 'รอรับเรื่อง'],
-                                 n_samples, p=[0.7, 0.25, 0.05]),
-        'solve_days': np.random.gamma(shape=2, scale=20, size=n_samples),
-        'anomaly_score': np.random.beta(2, 5, size=n_samples)
-    })
+    # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
 
+    # Create state column from state_* columns
+    def get_state(row):
+        if row.get('state_เสร็จสิ้น', 0) == 1.0:
+            return 'เสร็จสิ้น'
+        elif row.get('state_กำลังดำเนินการ', 0) == 1.0:
+            return 'กำลังดำเนินการ'
+        elif row.get('state_รอรับเรื่อง', 0) == 1.0:
+            return 'รอรับเรื่อง'
+        return 'Unknown'
+
+    df['state'] = df.apply(get_state, axis=1)
+
+    # Create ticket_id from index
+    df['ticket_id'] = [f'2021-{i:06d}' for i in range(len(df))]
+
+    # Add anomaly_score (simple heuristic: based on solve_days)
+    # Anomaly if solve_days is unusually high or low
+    median_solve = df['solve_days'].median()
+    std_solve = df['solve_days'].std()
+    df['anomaly_score'] = np.abs(df['solve_days'] - median_solve) / (std_solve + 1)
+    df['anomaly_score'] = df['anomaly_score'].clip(0, 1)  # Normalize to 0-1
+
+    # Extract time components
     df['year'] = df['timestamp'].dt.year
     df['month'] = df['timestamp'].dt.month
     df['day_of_week'] = df['timestamp'].dt.dayofweek
     df['hour'] = df['timestamp'].dt.hour
+
+    # Drop rows with missing critical data
+    df = df.dropna(subset=['lat', 'lon', 'timestamp'])
 
     return df
 
