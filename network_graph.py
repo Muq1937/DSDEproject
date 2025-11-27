@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from collections import Counter
 from itertools import combinations
-import community as community_louvain
+from networkx.algorithms import community as nx_community
 from data_processor import TraffyDataProcessor
 
 
@@ -83,17 +83,24 @@ class ComplaintNetworkGraph:
         return G
 
     def detect_communities(self):
-        """Detect communities in the network using Louvain algorithm."""
+        """Detect communities in the network using greedy modularity algorithm."""
         if self.graph is None:
             raise ValueError("Graph not built. Call build_network() first.")
 
-        # Detect communities
-        communities = community_louvain.best_partition(self.graph)
+        # Detect communities using greedy modularity maximization
+        communities_generator = nx_community.greedy_modularity_communities(self.graph)
+        communities_list = list(communities_generator)
+
+        # Convert to dict format {node: community_id}
+        communities = {}
+        for comm_id, comm_nodes in enumerate(communities_list):
+            for node in comm_nodes:
+                communities[node] = comm_id
 
         # Add community attribute to nodes
         nx.set_node_attributes(self.graph, communities, 'community')
 
-        print(f"  Detected {len(set(communities.values()))} communities")
+        print(f"  Detected {len(communities_list)} communities")
 
         return communities
 
@@ -289,7 +296,7 @@ class ComplaintNetworkGraph:
             raise ValueError("Graph not built. Call build_network() first.")
 
         metrics = self.calculate_metrics()
-        communities = community_louvain.best_partition(self.graph)
+        communities = self.detect_communities()
 
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write("=" * 60 + "\n")
