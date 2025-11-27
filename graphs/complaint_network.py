@@ -12,7 +12,7 @@ from collections import Counter
 import itertools
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import community.community_louvain as community_louvain
+from networkx.algorithms import community as nx_community
 import logging
 from pathlib import Path
 
@@ -102,15 +102,23 @@ class ComplaintNetworkAnalyzer:
         return self.organization_network
 
     def detect_communities(self, G: nx.Graph):
-        """Detect communities using Louvain algorithm"""
+        """Detect communities using greedy modularity algorithm"""
         logger.info("Detecting communities...")
 
         if len(G.nodes()) == 0:
             return {}
 
-        partition = community_louvain.best_partition(G, weight='weight')
+        # Use greedy modularity communities from NetworkX
+        communities_generator = nx_community.greedy_modularity_communities(G, weight='weight')
+        communities_list = list(communities_generator)
 
-        n_communities = len(set(partition.values()))
+        # Convert to dict format {node: community_id}
+        partition = {}
+        for comm_id, comm_nodes in enumerate(communities_list):
+            for node in comm_nodes:
+                partition[node] = comm_id
+
+        n_communities = len(communities_list)
         logger.info(f"Detected {n_communities} communities")
 
         return partition
