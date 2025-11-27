@@ -46,9 +46,9 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    """Load processed complaint data from bangkok_traffy_30.csv"""
+    """Load processed complaint data from bangkok_traffy.csv"""
     # Load from actual CSV file
-    csv_path = 'bangkok_traffy_30.csv'
+    csv_path = 'bangkok_traffy.csv'
 
     # Load CSV
     df = pd.read_csv(csv_path)
